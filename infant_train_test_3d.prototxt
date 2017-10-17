@@ -755,15 +755,15 @@ layer {
 }
 layer {
   name: "loss"
-  type: "SoftmaxWithLossW"
+  type: "MultiTaskSoftmaxWithLoss"
   bottom: "conv6_3"
   bottom: "dataSeg"
   top: "loss"
-  softmax_lossw_param {
+  multi_task_softmax_loss_param {
     weight_labels: 0
     weight_labels: 1
-    labels_weight: 1 
-    labels_weight: 5
+    labels_weight: 0.1
+    labels_weight: 2 
   }
   loss_param {
     ignore_label: -1
@@ -771,19 +771,19 @@ layer {
   softmax_param {
     axis: 1
   }
-  include: { phase: TRAIN }
+  #include: { phase: TRAIN }
 }
 layer {
   name: "loss"
-  type: "SoftmaxWithLossW"
+  type: "MultiTaskSoftmaxWithLoss"
   bottom: "conv6_3"
   bottom: "dataSeg"
   top: "loss"
-  softmax_lossw_param {
+  multi_task_softmax_loss_param {
     weight_labels: 0
     weight_labels: 1
-    labels_weight: 1 
-    labels_weight: 5
+    labels_weight: 0.1
+    labels_weight: 2 
   }
   loss_param {
     ignore_label: -1
@@ -791,7 +791,7 @@ layer {
   softmax_param {
     axis: 1
   }
-  include: { phase: TEST }
+  #include: { phase: TEST }
 }
 
 #layer {
