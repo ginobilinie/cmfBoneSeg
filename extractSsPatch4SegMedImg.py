@@ -16,11 +16,11 @@ import h5py
 import numpy as np
 
 eps=1e-5
-d1=3
-d2=168
-d3=112
+d1=5 # set to be any number you  would like the patch to be
+d2=184 # set to be any number you  would like the patch to be
+d3=152 # set to be any number you  would like the patch to be
 dFA=[d1,d2,d3] # size of patches of input data
-dSeg=[1,168,112] # size of pathes of label data
+dSeg=[5,184,152] # size of pathes of label data, e.g., you can set to be 5x184x152
 step1=1
 step2=32
 step3=54
@@ -101,14 +101,14 @@ def cropCubic(matFA,matSeg,fileID,d,step,rate):
     trainFA2D=trainFA2D[0:cubicCnt,:,:,:]
     trainSeg2D=trainSeg2D[0:cubicCnt,:,:,:]
 
-    with h5py.File('./train3x168x112_%s.h5'%fileID,'w') as f:
+    with h5py.File('./train5x184x152_%s.h5'%fileID,'w') as f:
         f['dataMR']=trainFA
         f['dataSeg']=trainSeg
         f['dataMR2D']=trainFA2D
         f['dataSeg2D']=trainSeg2D
      
-    with open('./trainPelvic3x168x112_all29_list.txt','a') as f:
-        f.write('/shenlab/lab_stor3/dongnie/pelvicSeg/mrs_data/train3x168x112_%s.h5\n'%fileID)
+    with open('./trainYouOwnData_list.txt','a') as f:
+        f.write('/path/to/your/h5folder/train5x184x152_%s.h5\n'%fileID)
     return cubicCnt
 
 #to remove zero slices along the 1st dimension
