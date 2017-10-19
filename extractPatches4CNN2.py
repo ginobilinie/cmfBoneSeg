@@ -1,9 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun 29 14:31:36 2017
-
-@author: xuhuaren
 
 We extract patches for the 2nd CNN based on the result of the 1st CNN.
 07/31/2017
@@ -42,30 +39,32 @@ Actually, we donot need it any more,  this is useful to generate hdf5 database
 '''
 def extractPatches4OneSubject(matFA, matSeg, matProb, fileID, d, step, rate):
   
-    rate1=1.0/2
-    rate2=1.0/4
-    [row,col,leng]=matFA.shape
-    cubicCnt=0
-    estNum=20000
-    trainFA=np.zeros([estNum,1, dFA[0],dFA[1],dFA[2]],np.float16)
-    trainSeg=np.zeros([estNum,1,dSeg[0],dSeg[1],dSeg[2]],dtype=np.int8)
-    trainFA2D=np.zeros([estNum, dFA[0],dFA[1],dFA[2]],np.float16)
-    trainSeg2D=np.zeros([estNum,dSeg[0],dSeg[1],dSeg[2]],dtype=np.int8)
+    rate1 = 1.0/2
+    rate2 = 1.0/4
+    [row,col,leng] = matFA.shape
+    cubicCnt = 0
+    estNum = 20000
+    trainFA = np.zeros([estNum,1, dFA[0],dFA[1],dFA[2]],np.float16)
+    trainSeg = np.zeros([estNum,1,dSeg[0],dSeg[1],dSeg[2]],dtype=np.int8)
+    trainProb = np.zeros([estNum,1, dFA[0],dFA[1],dFA[2]],np.float16)
+
+#     trainFA2D=np.zeros([estNum, dFA[0],dFA[1],dFA[2]],np.float16)
+#     trainSeg2D=np.zeros([estNum,dSeg[0],dSeg[1],dSeg[2]],dtype=np.int8)
     print 'trainFA shape, ',trainFA.shape
     #to padding for input
-    margin1=(dFA[0]-dSeg[0])/2
-    margin2=(dFA[1]-dSeg[1])/2
-    margin3=(dFA[2]-dSeg[2])/2
-    cubicCnt=0
-    marginD=[margin1,margin2,margin3]
+    margin1 = (dFA[0]-dSeg[0])/2
+    margin2 = (dFA[1]-dSeg[1])/2
+    margin3 = (dFA[2]-dSeg[2])/2
+    cubicCnt = 0
+    marginD = [margin1,margin2,margin3]
     print 'matFA shape is ',matFA.shape
-    matFAOut=np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
+    matFAOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
     print 'matFAOut shape is ',matFAOut.shape
-    matFAOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matFA
-    matSegOut=np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
-    matSegOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matSeg
-    matProbOut=np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
-    matProbOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matProb
+    matFAOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matFA
+    matSegOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
+    matSegOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matSeg
+    matProbOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
+    matProbOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matProb
     
     # for mageFA, enlarge it by padding
     if margin1!=0:
@@ -103,33 +102,37 @@ def extractPatches4OneSubject(matFA, matSeg, matProb, fileID, d, step, rate):
     for i in range(0,row-dSeg[0],step[0]):
         for j in range(0,col-dSeg[1],step[1]):
             for k in range(0,leng-dSeg[2],step[2]):
-                volSeg=matSeg[i:i+dSeg[0],j:j+dSeg[1],k:k+dSeg[2]]
+                volSeg = matSeg[i:i+dSeg[0],j:j+dSeg[1],k:k+dSeg[2]]
                 if np.sum(volSeg)<eps:
                     continue
                 if matProb[i,j,k]>0.7 or matProb[i,j,k]<0.3: # we only consider those uncertain regions
                     continue
-                cubicCnt=cubicCnt+1
+                cubicCnt = cubicCnt+1
                 #index at scale 1
             
                 
-                volFA=matFAOut[i:i+dFA[0],j:j+dFA[1],k:k+dFA[2]]
+                volFA = matFAOut[i:i+dFA[0],j:j+dFA[1],k:k+dFA[2]]
+                volProb = matProbOut[i:i+dFA[0],j:j+dFA[1],k:k+dFA[2]]
               
-                trainFA[cubicCnt,0,:,:,:]=volFA #32*32*32
-                trainSeg[cubicCnt,0,:,:,:]=volSeg#24*24*24
+                trainFA[cubicCnt,0,:,:,:] = volFA #32*32*32
+                trainSeg[cubicCnt,0,:,:,:] = volSeg#24*24*24
+                trainProb[cubicCnt,0,:,:,:] = volProb#24*24*24
 
 #                 trainFA2D[cubicCnt,:,:,:]=volFA #32*32*32
 #                 trainSeg2D[cubicCnt,:,:,:]=volSeg#24*24*24
 
 
-    trainFA=trainFA[0:cubicCnt,:,:,:,:]
-    trainSeg=trainSeg[0:cubicCnt,:,:,:,:]
+    trainFA = trainFA[0:cubicCnt,:,:,:,:]
+    trainSeg = trainSeg[0:cubicCnt,:,:,:,:]
+    trainProb = trainProb[0:cubicCnt,:,:,:,:]
 
 #     trainFA2D=trainFA2D[0:cubicCnt,:,:,:]
 #     trainSeg2D=trainSeg2D[0:cubicCnt,:,:,:]
 
     with h5py.File('./traincnn2_%s.h5'%fileID,'w') as f:
-        f['dataMR']=trainFA
-        f['dataSeg']=trainSeg
+        f['dataMR'] = trainFA
+        f['dataSeg'] = trainSeg
+        f['dataProb'] = trainProb
 #         f['dataMR2D']=trainFA2D
 #         f['dataSeg2D']=trainSeg2D
      
@@ -331,4 +334,6 @@ def main():
 if __name__ == '__main__':     
     main()                
             
+        
+
         
