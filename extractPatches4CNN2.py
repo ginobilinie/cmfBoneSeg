@@ -63,6 +63,8 @@ def extractPatches4OneSubject(matFA, matSeg, matPred, matProb, fileID, d, step, 
     matFAOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matFA
     matSegOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
     matSegOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matSeg
+    matPredOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
+    matPredOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matPred
     matProbOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
     matProbOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]] = matProb
     
@@ -86,6 +88,16 @@ def extractPatches4OneSubject(matFA, matSeg, matPred, matProb, fileID, d, step, 
     if margin3!=0:
         matSegOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],0:marginD[2]]=matSeg[:,:,marginD[2]-1::-1] #we'd better flip it along the 3rd dimension
         matSegOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]+leng:matSegOut.shape[2]]=matSeg[:,:,matSeg.shape[2]-1:leng-marginD[2]-1:-1]
+    # for the prediction map     
+    if margin1!=0:
+        matPredOut[0:marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matPred[marginD[0]-1::-1,:,:] #reverse 0:marginD[0]
+        matPredOut[row+marginD[0]:matPredOut.shape[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matPred[matPred.shape[0]-1:row-marginD[0]-1:-1,:,:] #we'd better flip it along the 1st dimension
+    if margin2!=0:
+        matPredOut[marginD[0]:row+marginD[0],0:marginD[1],marginD[2]:leng+marginD[2]]=matPred[:,marginD[1]-1::-1,:] #we'd flip it along the 2nd dimension
+        matPredOut[marginD[0]:row+marginD[0],col+marginD[1]:matPredOut.shape[1],marginD[2]:leng+marginD[2]]=matPred[:,matPred.shape[1]-1:col-marginD[1]-1:-1,:] #we'd flip it along the 2nd dimension
+    if margin3!=0:
+        matPredOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],0:marginD[2]]=matPred[:,:,marginD[2]-1::-1] #we'd better flip it along the 3rd dimension
+        matPredOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]+leng:matPredOut.shape[2]]=matPred[:,:,matPred.shape[2]-1:leng-marginD[2]-1:-1]    
     # for the probability map     
     if margin1!=0:
         matProbOut[0:marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matProb[marginD[0]-1::-1,:,:] #reverse 0:marginD[0]
@@ -95,17 +107,16 @@ def extractPatches4OneSubject(matFA, matSeg, matPred, matProb, fileID, d, step, 
         matProbOut[marginD[0]:row+marginD[0],col+marginD[1]:matProbOut.shape[1],marginD[2]:leng+marginD[2]]=matProb[:,matProb.shape[1]-1:col-marginD[1]-1:-1,:] #we'd flip it along the 2nd dimension
     if margin3!=0:
         matProbOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],0:marginD[2]]=matProb[:,:,marginD[2]-1::-1] #we'd better flip it along the 3rd dimension
-        matProbOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]+leng:matProbOut.shape[2]]=matProb[:,:,matProb.shape[2]-1:leng-marginD[2]-1:-1]    
-        
+        matProbOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]+leng:matProbOut.shape[2]]=matProb[:,:,matProb.shape[2]-1:leng-marginD[2]-1:-1]            
     dsfactor = rate
     #actually, we can specify a bounding box along the 2nd and 3rd dimension, so we can make it easier 
     for i in range(0,row-dSeg[0],step[0]):
         for j in range(0,col-dSeg[1],step[1]):
             for k in range(0,leng-dSeg[2],step[2]):
-                volSeg = matSeg[i:i+dSeg[0],j:j+dSeg[1],k:k+dSeg[2]]
+                volSeg = matSegOut[i:i+dSeg[0],j:j+dSeg[1],k:k+dSeg[2]]
                 if np.sum(volSeg)<eps:
                     continue
-                if matProb[i,j,k]>0.7 or matProb[i,j,k]<0.3 and matPred[i,j,k] == matSeg[i,j,k]: # we only consider those uncertain regions or those uncorrected classifed regions
+                if matProbOut[i,j,k]>0.7 or matProbOut[i,j,k]<0.3 and matPredOut[i,j,k] == matSegOut[i,j,k]: # we only consider those uncertain regions or those uncorrected classifed regions
                     continue
                 cubicCnt = cubicCnt+1
                 #index at scale 1
