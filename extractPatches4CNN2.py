@@ -37,7 +37,7 @@ all_num =0
 '''
 Actually, we donot need it any more,  this is useful to generate hdf5 database
 '''
-def extractPatches4OneSubject(matFA, matSeg, matProb, fileID, d, step, rate):
+def extractPatches4OneSubject(matFA, matSeg, matPred, matProb, fileID, d, step, rate):
   
     rate1 = 1.0/2
     rate2 = 1.0/4
@@ -105,7 +105,7 @@ def extractPatches4OneSubject(matFA, matSeg, matProb, fileID, d, step, rate):
                 volSeg = matSeg[i:i+dSeg[0],j:j+dSeg[1],k:k+dSeg[2]]
                 if np.sum(volSeg)<eps:
                     continue
-                if matProb[i,j,k]>0.7 or matProb[i,j,k]<0.3: # we only consider those uncertain regions
+                if matProb[i,j,k]>0.7 or matProb[i,j,k]<0.3 and matPred[i,j,k] == matSeg[i,j,k]: # we only consider those uncertain regions or those uncorrected classifed regions
                     continue
                 cubicCnt = cubicCnt+1
                 #index at scale 1
@@ -282,7 +282,9 @@ def main():
         labelfilename='mask%d_resampled.nii.gz'%ind  # provide a sample name of your filename of ground truth here
         labelfn=os.path.join(path,labelfilename)
         probfilename='prob%d_resampled.nii.gz'%ind  # provide a sample name of your filename of ground truth here
-        probfn=os.path.join(path,labelfilename)
+        probfn=os.path.join(path,probfilename)
+        predfilename='pred%d_resampled.nii.gz'%ind  # provide a sample name of your filename of ground truth here
+        predfn=os.path.join(path,predfilename)
         imgOrg=sitk.ReadImage(datafn)
         mrimg=sitk.GetArrayFromImage(imgOrg)
         tmpMR=mrimg
@@ -292,7 +294,8 @@ def main():
         labelimg=sitk.GetArrayFromImage(labelOrg)
         probOrg=sitk.ReadImage(probfn)
         probimg=sitk.GetArrayFromImage(probOrg)
-
+        predOrg=sitk.ReadImage(predfn)
+        predimg=sitk.GetArrayFromImage(predOrg)
         
         rate=1
         print 'unique labels are ',np.unique(labelimg)
@@ -328,12 +331,10 @@ def main():
         mrimg=mrimg[:,:,tmpMat.shape[2]-1::-1]
         labelimg=labelimg[:,:,tmpLabel.shape[2]-1::-1]
         fileID='%d_flip3'%ind
-        cubicCnt=extractPatches4OneSubject(mrimg,labelimg, probimg, fileID, dFA,step,rate)
+        cubicCnt=extractPatches4OneSubject(mrimg,labelimg, predimg, probimg, fileID, dFA,step,rate)
 
     
 if __name__ == '__main__':     
     main()                
             
-        
-
         
