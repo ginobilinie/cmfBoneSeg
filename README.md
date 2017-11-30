@@ -9,4 +9,13 @@ Segmentation of Craniomaxillofacial Bony Structures from MRI with A Cascade Deep
 6. infant_solver_3d.prototxt: the solver file for training the 3d Unet network
 7. context_cnn_train_test.prototxt: the 3d context-cnn network definitiion file
 
-I'll update more...
+
+For the 1st stage: you can use the following settings, I have high confidence that you can achieve even better performance than what I wrote in my paper:
+<B>Training elements:</B>
+  train_boneSeg.sh
+  boneSeg_train_test_3d.prototxt
+  solver_mri_3d.prototxt
+
+Testing elements:
+  evalCaffeCMFSeg4MedImg.py
+  boneSeg_deploy_3d1.prototxt
