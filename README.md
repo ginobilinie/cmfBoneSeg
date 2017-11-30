@@ -17,6 +17,6 @@ For the 1st stage: you can use the following settings, I have high confidence th
   b). boneSeg_train_test_3d.prototxt
   c). solver_mri_3d.prototxt
 
-Testing elements:
+<B>Testing elements:</B>
   a). evalCaffeCMFSeg4MedImg.py
   b). boneSeg_deploy_3d1.prototxt
