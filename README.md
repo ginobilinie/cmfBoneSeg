@@ -11,11 +11,12 @@ Segmentation of Craniomaxillofacial Bony Structures from MRI with A Cascade Deep
 
 
 For the 1st stage: you can use the following settings, I have high confidence that you can achieve even better performance than what I wrote in my paper:
+
 <B>Training elements:</B>
-  train_boneSeg.sh
-  boneSeg_train_test_3d.prototxt
-  solver_mri_3d.prototxt
+  a). train_boneSeg.sh
+  b). boneSeg_train_test_3d.prototxt
+  c). solver_mri_3d.prototxt
 
 Testing elements:
-  evalCaffeCMFSeg4MedImg.py
-  boneSeg_deploy_3d1.prototxt
+  a). evalCaffeCMFSeg4MedImg.py
+  b). boneSeg_deploy_3d1.prototxt
