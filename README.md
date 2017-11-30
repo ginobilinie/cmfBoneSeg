@@ -1,5 +1,5 @@
 # cmfBoneSeg
-Segmentation of Craniomaxillofacial Bony Structures from MRI with A Cascade Deep Learning Framework. There are an amount of plastic surgery every year. Traditionally, medical doctors use CT as the modality to model the CMF bone structure. While CT is radioactive, so we plan to use MRI which is a safe and non-invasive protocol as the modality to assess the CMF bone model.
+Segmentation of Craniomaxillofacial Bony Structures from MRI with A Cascade Deep Learning Framework. There are an amount of plastic surgery every year. Traditionally, medical doctors use CT as the modality to model the CMF bone structure. While CT is radioactive, so we plan to use MRI which is a safe and non-invasive protocol as the modality to assess the CMF bone model. We propose to use a cascade DL framework, which can adaptively pay more attention to the difficulty regions (mainly boundaries), to assess the CMF bone model.
 
 We attach all the codes in this repository, if you think it is helpful for you, please cite:
 
