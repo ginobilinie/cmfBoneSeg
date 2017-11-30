@@ -25,9 +25,9 @@ import scipy.io as scio
 from scipy import ndimage as nd
 
 # Make sure that caffe is on the python path:
-#caffe_root = '/usr/local/caffe3/'  # this is the path in GPU server
+caffe_root = '/usr/local/caffe3/'  # this is the path in GPU server
 #caffe_root = '/home/dongnie/caffe3D/'  # this is the path in GPU server
-caffe_root = '/home/dongnie/Desktop/Caffes/caffe/'  # this is the path in GPU server
+# caffe_root = '/home/dongnie/Desktop/Caffes/caffe/'  # this is the path in GPU server
 import sys
 sys.path.insert(0, caffe_root + 'python')
 print caffe_root + 'python'
@@ -41,8 +41,9 @@ solver = None  # ignore this workaround for lmdb data (can't instantiate two sol
 #protopath='/home/dongnie/caffe3D/examples/prostate/'
 #protopath='/home/dongnie/caffe3D/examples/pelvicSeg/'
 protopath='/home/dongnie/Desktop/Caffes/caffe/examples/SkullStripping/'
+protopath = '/shenlab/lab_stor5/dongnie/big_patch/'
 #mynet = caffe.Net(protopath+'prostate_deploy_v12_1.prototxt',protopath+'prostate_fcn_v12_1_iter_100000.caffemodel',caffe.TEST)
-mynet = caffe.Net(protopath+'infant_deploy_3d.prototxt',protopath+'infant_fcn_3d_iter_30000.caffemodel',caffe.TEST)
+mynet = caffe.Net(protopath+'boneSeg_deploy_3d1.prototxt',protopath+'boneSeg_1125__iter_25000.caffemodel',caffe.TEST)
 print("blobs {}\nparams {}".format(mynet.blobs.keys(), mynet.params.keys()))
 
 d1=152
@@ -68,12 +69,12 @@ def evalOneSubject(matFA,matSeg,fileID,d,step,rate):
     margin2=(dFA[1]-dSeg[1])/2
     margin3=(dFA[2]-dSeg[2])/2
     cubicCnt=0
-    marginD=[margin1,margin2,margin3]
+    marginD = [margin1,margin2,margin3]
     
     print 'matFA shape is ',matFA.shape
-    matFAOut=np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
+    matFAOut = np.zeros([row+2*marginD[0],col+2*marginD[1],leng+2*marginD[2]])
     print 'matFAOut shape is ',matFAOut.shape
-    matFAOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matFA
+    matFAOut[marginD[0]:row+marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]= matFA
 
 #     matFAOut[0:marginD[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matFA[0:marginD[0],:,:] #we'd better flip it along the first dimension
 #     matFAOut[row+marginD[0]:matFAOut.shape[0],marginD[1]:col+marginD[1],marginD[2]:leng+marginD[2]]=matFA[row-marginD[0]:matFA.shape[0],:,:] #we'd better flip it along the 1st dimension
@@ -173,15 +174,19 @@ def dice(im1, im2,tid):
 
 def main():
     datapath='/home/dongnie/warehouse/BrainCTData/'
+    datapath = '/shenlab/lab_stor5/dongnie/big_patch/BrainCTData/'
 #     datapath='/home/dongnie/Desktop/Caffes/data/infantBrain/normals/'
     #datapath='/home/dongnie/warehouse/NDAR_ACE/'
     dirname='P1'
     dataT1filename='mr1_processed_resampled_p2_cropped_processed_histmatchedp2.hdr'
     labelfilename='ct1_processed_resampled_p2_cropped_processed.hdr'
+    labelfilename='a.hdr'
+
     ids=[45,46,47,48,49,50,51]
  
     #ids=[1,2,3,4,5,6,7,8,9,10,11] 
     ids=[2,3,4,5,8,9,10,13]
+    ids=[10,13]
     
     for i in range(0, len(ids)):
         myid=ids[i]    
@@ -241,9 +246,29 @@ def main():
         rate=1
         print np.unique(labelimg),np.ndarray.max(mrimg),np.ndarray.min(mrimg)
         matOut,matSeg,matProb=evalOneSubject(mrimg,labelimg,fileID,dSeg,step,rate)
+        
 #         print np.unique(matOut),np.unique(matSeg),np.unique(matProb)
         volOut=sitk.GetImageFromArray(matOut)
         sitk.WriteImage(volOut,'preSub%d.nii.gz'%myid)
+   
+        ''' 
+            as we want to keep the predicted maps thicker, 
+             so we use a user-specific prob threshold to re-generate the segmentation maps
+        '''
+        matThicker = np.zeros(matProb.shape)
+        threshold = 0.1
+        matThicker[matProb>threshold] = 1
+        
+        matThicker = np.rint(matThicker)
+        matOut = np.rint(matOut)
+        matSeg = np.rint(matSeg)
+        dice1 = dice(matOut, matSeg, 1)
+        dice2 = dice(matThicker, matSeg, 1)
+        print 'diceOut for subject {}'.format(myid),' is {}'.format(dice1)
+        print 'diceThicker for subject {}'.format(myid),' is {}'.format(dice2)
+        
+        volThicker=sitk.GetImageFromArray(matThicker)
+        sitk.WriteImage(volThicker,'preSub%d_thicker.nii.gz'%myid)
         
         volSeg=sitk.GetImageFromArray(matSeg)
         sitk.WriteImage(volSeg,'gt%d.nii.gz'%myid)
