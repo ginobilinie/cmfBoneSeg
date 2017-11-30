@@ -10,7 +10,7 @@ Segmentation of Craniomaxillofacial Bony Structures from MRI with A Cascade Deep
 7. context_cnn_train_test.prototxt: the 3d context-cnn network definitiion file
 
 
-For the 1st stage: you can use the following settings, I have high confidence that you can achieve even better performance than what I wrote in my paper:
+For the <B>1st</B> stage: you can use the following settings, I have high confidence that you can achieve even better performance than what I wrote in my paper:
 
 <B>Training elements:</B>
   a). train_boneSeg.sh
@@ -20,3 +20,6 @@ For the 1st stage: you can use the following settings, I have high confidence th
 <B>Testing elements:</B>
   a). evalCaffeCMFSeg4MedImg.py
   b). boneSeg_deploy_3d1.prototxt
+
+
+For the <B>2nd</B> stage: you can use the following settings, I also have high confidence you can achieve at least the same performance mentioned in my paper:
